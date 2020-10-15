@@ -1,0 +1,33 @@
+name: RedstoneProbe
+version: ${project.version}
+main: io.github.trimill.redstoneprobe.RedstoneProbe
+api-version: 1.16
+authors: [ TriMill ]
+description: Tools to test the timing of redstone circuits
+commands:
+  probe:
+    description: Give yourself a probe, show/hide probe messages, or clear active probes
+    usage: /<command> [clear|hide|show] OR /<command> add|remove <x> <y> <z>
+  probectl:
+    description: Control the probe settings of other players
+    usage: /<command> clear|dump
+permissions:
+  redstoneprobe.*:
+    description: Full access to RedstoneProbe
+    children:
+      redstoneprobe.command.*: true
+      redstoneprobe.probe: true
+  redstoneprobe.command.*:
+    description: Access to all RedstoneProbe commands
+    children:
+      redstoneprobe.command.probe: true
+      redstoneprobe.command.probectl: true
+  redstoneprobe.command.probe:
+    description: Access to the /probe command
+    default: op
+  redstoneprobe.command.probectl:
+    description: Access to the /probectl command (for moderators)
+    default: op
+  redstoneprobe.probe:
+    description: Use of the probe item
+    default: op
