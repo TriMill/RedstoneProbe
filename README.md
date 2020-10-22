@@ -12,13 +12,30 @@ Once a probe is set, you will recieve chat messages whenever the component turns
 
 The command `/probectl` is also available, designed for server admins. This can be used to clear the probes of other players (`/probectl clear <player>`) or dump a list of probes to console (`/probectl dump`). The storage of probes is optimised using hash maps and hash sets to reduce lag.
 
+## Commands
+
+| Command | Aliases | Usage |
+| --- | --- | --- |
+| `/probe` | `/pr` | Give yourself the probe item |
+| `/probe clear` | `/pr cl` | Clear all probes |
+| `/probe list` | `/pr ls` | List all probes |
+| `/probe hide` | `/pr h` | Temporary hide probe messages |
+| `/probe show` | `/pr s` | Stop hiding messages |11
+| `/probe add <location>` | `/pr a <location>` | Set a probe at a location |
+| `/probe remove <location>` | `/pr r <location>` | Remove a probe from a location |
+| `/probe help` | `/pr ?` | Show help message |
+| `/probectl clear` | `/prctl cl` | Clear probes for all players |
+| `/probectl clear <player>` | `/prctl cl <player>` | Clear probes for a specific player |
+| `/probectl dump` | `/prctl dump` | Dump all probe data to the server console |
+| `/probectl help` | `/prctl ?` | Show help message |
+
+
 ## Planned additions
- - Implement permissions
  - Refactoring and organization
  - Naming probes, delete by name
- - List probes
 
 ## Possible additions
  - Persistent particles
  - Signal strength
+ - More timing tools
  - Further optimisations

@@ -7,10 +7,12 @@ description: Tools to test the timing of redstone circuits
 commands:
   probe:
     description: Give yourself a probe, show/hide probe messages, or clear active probes
-    usage: /<command> [clear|hide|show] OR /<command> add|remove <x> <y> <z>
+    usage: §cInvalid command. For help, use §6/probe help
+    aliases: pr
   probectl:
     description: Control the probe settings of other players
-    usage: /<command> clear|dump
+    usage: §cInvalid command. For help, use §6/probectl help
+    aliases: prctl
 permissions:
   redstoneprobe.*:
     description: Full access to RedstoneProbe

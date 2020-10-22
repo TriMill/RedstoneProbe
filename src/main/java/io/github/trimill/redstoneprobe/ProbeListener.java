@@ -15,22 +15,6 @@ import java.util.UUID;
 
 public class ProbeListener implements Listener {
 
-	public static void sendAddMessage(Player player, Location loc) {
-		String message = String.format(
-				"Probe set for block " + ChatColor.WHITE + "(%d,%d,%d).",
-				loc.getBlockX(),
-				loc.getBlockY(),
-				loc.getBlockZ()
-		);
-		player.sendMessage(RedstoneProbe.CHAT_PREFIX + message);
-		player.spawnParticle(Particle.FLAME, loc.toCenterLocation(), 12, 0, 0.5, 0, 0.01);
-	}
-
-	public static void sendRemoveMessage(Player player, Location loc) {
-		player.sendMessage(RedstoneProbe.CHAT_PREFIX + "Removed probe for block.");
-		player.spawnParticle(Particle.SMOKE_NORMAL, loc.toCenterLocation(), 12, 0, 0.5, 0, 0.01);
-	}
-
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent e) {
 		ItemStack item = e.getItem();
@@ -38,17 +22,21 @@ public class ProbeListener implements Listener {
 		if(block != null &&
 				item != null && item.getType().equals(Material.SOUL_TORCH) && item.hasItemFlag(ItemFlag.HIDE_PLACED_ON)
 		) {
-			Player player = e.getPlayer();
-			UUID uuid = player.getUniqueId();
-			Location loc = e.getClickedBlock().getLocation();
-			if(RedstoneProbe.existsProbe(player, loc)) {
-				RedstoneProbe.removeProbe(player, loc);
-				sendRemoveMessage(player, loc);
-			} else {
-				RedstoneProbe.addProbe(player, loc);
-				sendAddMessage(player, loc);
-			}
 			e.setCancelled(true);
+			Player player = e.getPlayer();
+			if(!player.hasPermission("redstoneprobe.probe")) {
+				if(player.hasPermission("redstoneprobe.command.probe"))
+					player.sendMessage(Utils.NO_PROBE_ITEM);
+				else
+					player.sendMessage(Utils.NO_PERMS);
+				return;
+			}
+			Location loc = e.getClickedBlock().getLocation();
+			if(Utils.existsProbe(player, loc)) {
+				Utils.removeWithMessage(player, loc);
+			} else {
+				Utils.addWithMessage(player, loc);
+			}
 		}
 	}
 
@@ -56,17 +44,23 @@ public class ProbeListener implements Listener {
 	public void onRedstoneEvent(BlockRedstoneEvent e) {
 		if(e.getOldCurrent() > 0 && e.getNewCurrent() > 0) return;
 		Location loc = e.getBlock().getLocation();
-		if(RedstoneProbe.activeProbes.containsKey(loc)) {
-			Set<Player> players = RedstoneProbe.activeProbes.get(loc);
-			String change = (e.getOldCurrent() == 0) ? ChatColor.GREEN + "on" + ChatColor.RESET : ChatColor.RED + "off" + ChatColor.RESET ;
-			String fmessage = "%s(%d,%d,%d)%s %s%s turned %s (tick %s%d%s)";
+		if(Utils.activeProbes.containsKey(loc)) {
+			Set<UUID> uuids = Utils.activeProbes.get(loc);
+			int prevTime = Utils.server.getCurrentTick() - Utils.timeSinceChange.get(loc);
+			Utils.timeSinceChange.put(loc, Utils.server.getCurrentTick());
+			int tick = Utils.server.getCurrentTick() % 20;
+			String change = (e.getOldCurrent() == 0) ? ChatColor.GREEN + "on" + ChatColor.RESET : ChatColor.RED + "off" + ChatColor.RESET;
+			String notChange = (e.getOldCurrent() == 0) ? ChatColor.RED + "off" + ChatColor.RESET : ChatColor.GREEN + "on" + ChatColor.RESET;
+			String sPrevTime = ChatColor.YELLOW.toString() + prevTime + ChatColor.RESET.toString();
+
+			String fmessage = "%s(%d,%d,%d) t%s %s%s%s turned %s (was %s for %sgt)";
 			fmessage = String.format(fmessage,
-					ChatColor.AQUA, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
-					ChatColor.YELLOW, e.getBlock().getType().name(), ChatColor.RESET,
-					change,
-					ChatColor.YELLOW, RedstoneProbe.SERVER.getCurrentTick() % 20, ChatColor.RESET);
-			for(Player player: players) {
-				if(!RedstoneProbe.ignoringMessages.contains(player)) {
+					ChatColor.AQUA, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), tick,
+					ChatColor.YELLOW, e.getBlock().getType().name().toLowerCase(), ChatColor.RESET,
+					change, notChange, sPrevTime);
+			for(UUID uuid: uuids) {
+				Player player = Utils.server.getPlayer(uuid);
+				if(player != null && !Utils.ignoringMessages.contains(player.getUniqueId())) {
 					player.sendMessage(fmessage);
 				}
 			}
