@@ -6,10 +6,7 @@ import org.bukkit.Particle;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public final class Utils {
 	public static final String CHAT_PREFIX = ChatColor.WHITE + "[" + ChatColor.AQUA + "Probe" + ChatColor.WHITE + "] " + ChatColor.AQUA;
@@ -18,32 +15,37 @@ public final class Utils {
 			+ ChatColor.GREEN + "/probe add " + ChatColor.RED + "or "
 			+ ChatColor.GREEN + "/probe remove " + ChatColor.RED + "instead.";
 	public static Server server;
-	public static Map<Location, Set<Player>> activeProbes = new HashMap<>();
-	public static Set<Player> ignoringMessages = new HashSet<>();
+	public static Map<Location, Set<UUID>> activeProbes = new HashMap<>();
+	public static Map<Location, Integer> timeSinceChange = new HashMap<>();
+	public static Set<UUID> ignoringMessages = new HashSet<>();
 
 	private Utils(){}
 
 	public static boolean existsProbe(Player player, Location loc) {
 		if(!activeProbes.containsKey(loc)) return false;
-		return activeProbes.get(loc).contains(player);
+		return activeProbes.get(loc).contains(player.getUniqueId());
 	}
 
 	public static void addProbe(Player player, Location loc) {
 		if(activeProbes.containsKey(loc)) {
-			activeProbes.get(loc).add(player);
+			activeProbes.get(loc).add(player.getUniqueId());
 		} else {
-			Set<Player> s = new HashSet<>();
-			s.add(player);
+			Set<UUID> s = new HashSet<>();
+			s.add(player.getUniqueId());
 			activeProbes.put(loc, s);
+		}
+		if(!timeSinceChange.containsKey(loc)) {
+			timeSinceChange.put(loc, server.getCurrentTick());
 		}
 	}
 
 	public static boolean removeProbe(Player player, Location loc) {
 		if(activeProbes.containsKey(loc)) {
-			Set<Player> players = activeProbes.get(loc);
-			boolean ret = players.remove(player);
-			if(players.size() == 0) {
+			Set<UUID> uuids = activeProbes.get(loc);
+			boolean ret = uuids.remove(player.getUniqueId());
+			if(uuids.size() == 0) {
 				activeProbes.remove(loc);
+				timeSinceChange.remove(loc);
 				return true;
 			}
 			return ret;
@@ -55,10 +57,11 @@ public final class Utils {
 		boolean ret = false;
 		Set<Location> staticProbes = new HashSet<>(activeProbes.keySet());
 		for(Location loc: staticProbes) {
-			Set<Player> players = activeProbes.get(loc);
-			boolean result = players.remove(player);
-			if(players.size() == 0) {
+			Set<UUID> uuids = activeProbes.get(loc);
+			boolean result = uuids.remove(player.getUniqueId());
+			if(uuids.size() == 0) {
 				activeProbes.remove(loc);
+				timeSinceChange.remove(loc);
 				result = true;
 			}
 			ret = ret || result;
@@ -68,6 +71,17 @@ public final class Utils {
 
 	public static void resetProbeList() {
 		activeProbes.clear();
+		timeSinceChange.clear();
+	}
+
+	public static Set<Location> getAllProbes(Player player) {
+		Set<Location> result = new HashSet<>();
+		for(Location loc: activeProbes.keySet()) {
+			if(activeProbes.get(loc).contains(player.getUniqueId())) {
+				result.add(loc);
+			}
+		}
+		return result;
 	}
 
 	public static void addWithMessage(Player player, Location loc) {

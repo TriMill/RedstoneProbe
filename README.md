@@ -13,12 +13,11 @@ Once a probe is set, you will recieve chat messages whenever the component turns
 The command `/probectl` is also available, designed for server admins. This can be used to clear the probes of other players (`/probectl clear <player>`) or dump a list of probes to console (`/probectl dump`). The storage of probes is optimised using hash maps and hash sets to reduce lag.
 
 ## Planned additions
- - Implement permissions
  - Refactoring and organization
  - Naming probes, delete by name
- - List probes
 
 ## Possible additions
  - Persistent particles
  - Signal strength
+ - More timing tools
  - Further optimisations

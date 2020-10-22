@@ -13,6 +13,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Set;
 
 public class CommandProbe implements CommandExecutor {
 
@@ -37,7 +38,6 @@ public class CommandProbe implements CommandExecutor {
 				player.sendMessage(Utils.NO_PERMS);
 				return true;
 			}
-			// UUID uuid = player.getUniqueId();
 			if(args.length == 0) {
 				if(!player.hasPermission("redstoneprobe.probe")) {
 					player.sendMessage(Utils.NO_PROBE_ITEM);
@@ -50,19 +50,38 @@ public class CommandProbe implements CommandExecutor {
 				meta.addItemFlags(ItemFlag.HIDE_PLACED_ON);
 				probe.setItemMeta(meta);
 				player.getInventory().addItem(probe);
-			} else if(args.length == 1) {
-				if(args[0].equalsIgnoreCase("clear")) {
-					// Clear all probes
-					Utils.removeAllProbes(player);
-					player.sendMessage(Utils.CHAT_PREFIX + "Cleared all probes.");
-				} else if(args[0].equalsIgnoreCase("hide")) {
-					// Hide chat messages
-					Utils.ignoringMessages.add(player);
-					player.sendMessage(Utils.CHAT_PREFIX + "Probe messages disabled.");
-				} else if(args[0].equalsIgnoreCase("show")) {
-					// Show chat messages
-					Utils.ignoringMessages.remove(player);
-					player.sendMessage(Utils.CHAT_PREFIX + "Probe messages enabled.");
+			} else if(args.length == 1 || args.length == 2) {
+				if(args[0].equalsIgnoreCase("list")) {
+					// List all probes
+					Set<Location> probes = Utils.getAllProbes(player);
+					if(probes.isEmpty()) {
+						player.sendMessage(Utils.CHAT_PREFIX + ChatColor.RED + "No probes set.");
+						return true;
+					} else {
+						player.sendMessage(Utils.CHAT_PREFIX + String.format("%d probes:", probes.size()));
+						String fstring = ChatColor.YELLOW + "%s" + ChatColor.RESET + " at " + ChatColor.AQUA + "(%d,%d,%d)";
+						for(Location loc: probes) {
+							player.sendMessage(String.format(fstring,
+									loc.getBlock().getType().name().toLowerCase(),
+									loc.getBlockX(), loc.getBlockY(), loc.getBlockZ()
+							));
+						}
+					}
+				}
+				else if(args.length == 1) {
+					if(args[0].equalsIgnoreCase("clear")) {
+						// Clear all probes
+						Utils.removeAllProbes(player);
+						player.sendMessage(Utils.CHAT_PREFIX + "Cleared all probes.");
+					} else if(args[0].equalsIgnoreCase("hide")) {
+						// Hide chat messages
+						Utils.ignoringMessages.add(player.getUniqueId());
+						player.sendMessage(Utils.CHAT_PREFIX + "Probe messages disabled.");
+					} else if(args[0].equalsIgnoreCase("show")) {
+						// Show chat messages
+						Utils.ignoringMessages.remove(player.getUniqueId());
+						player.sendMessage(Utils.CHAT_PREFIX + "Probe messages enabled.");
+					} else return false;
 				} else return false;
 			} else if(args.length == 4) {
 				if(args[0].equalsIgnoreCase("add")) {

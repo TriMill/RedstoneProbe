@@ -26,17 +26,15 @@ public class CommandProbeCTL implements CommandExecutor {
 					Player player = sender.getServer().getPlayer(args[1]);
 					if(player == null) {
 						sender.sendMessage(ChatColor.RED + "No player found.");
-						return true;
 					} else {
 						Utils.removeAllProbes(player);
 						sender.sendMessage(ChatColor.GREEN + "Player " + player.getName() + " cleared.");
-						return true;
 					}
 				} else {
 					Utils.resetProbeList();
 					sender.sendMessage(ChatColor.GREEN + "Reset all probes.");
-					return true;
 				}
+				return true;
 			}
 		}
 		return false;
@@ -45,9 +43,7 @@ public class CommandProbeCTL implements CommandExecutor {
 	private String stringifyData() {
 		String res = "RedstoneProbe data:\n";
 		for(Location loc: Utils.activeProbes.keySet()) {
-			res = res + "{" + loc.toString() + ": ";
-			res += Utils.activeProbes.get(loc).toString();
-			res += "}\n";
+			res += "{" + Utils.activeProbes.get(loc).toString() + "}\n";
 		}
 		return res;
 	}

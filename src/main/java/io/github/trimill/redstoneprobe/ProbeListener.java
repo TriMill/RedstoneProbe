@@ -31,7 +31,6 @@ public class ProbeListener implements Listener {
 					player.sendMessage(Utils.NO_PERMS);
 				return;
 			}
-			UUID uuid = player.getUniqueId();
 			Location loc = e.getClickedBlock().getLocation();
 			if(Utils.existsProbe(player, loc)) {
 				Utils.removeWithMessage(player, loc);
@@ -46,16 +45,22 @@ public class ProbeListener implements Listener {
 		if(e.getOldCurrent() > 0 && e.getNewCurrent() > 0) return;
 		Location loc = e.getBlock().getLocation();
 		if(Utils.activeProbes.containsKey(loc)) {
-			Set<Player> players = Utils.activeProbes.get(loc);
-			String change = (e.getOldCurrent() == 0) ? ChatColor.GREEN + "on" + ChatColor.RESET : ChatColor.RED + "off" + ChatColor.RESET ;
-			String fmessage = "%s(%d,%d,%d)%s %s%s turned %s (tick %s%d%s)";
+			Set<UUID> uuids = Utils.activeProbes.get(loc);
+			int prevTime = Utils.server.getCurrentTick() - Utils.timeSinceChange.get(loc);
+			Utils.timeSinceChange.put(loc, Utils.server.getCurrentTick());
+			int tick = Utils.server.getCurrentTick() % 20;
+			String change = (e.getOldCurrent() == 0) ? ChatColor.GREEN + "on" + ChatColor.RESET : ChatColor.RED + "off" + ChatColor.RESET;
+			String notChange = (e.getOldCurrent() == 0) ? ChatColor.RED + "off" + ChatColor.RESET : ChatColor.GREEN + "on" + ChatColor.RESET;
+			String sPrevTime = ChatColor.YELLOW.toString() + prevTime + ChatColor.RESET.toString();
+
+			String fmessage = "%s(%d,%d,%d) t%s %s%s%s turned %s (was %s for %sgt)";
 			fmessage = String.format(fmessage,
-					ChatColor.AQUA, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(),
-					ChatColor.YELLOW, e.getBlock().getType().name(), ChatColor.RESET,
-					change,
-					ChatColor.YELLOW, Utils.server.getCurrentTick() % 20, ChatColor.RESET);
-			for(Player player: players) {
-				if(!Utils.ignoringMessages.contains(player)) {
+					ChatColor.AQUA, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), tick,
+					ChatColor.YELLOW, e.getBlock().getType().name().toLowerCase(), ChatColor.RESET,
+					change, notChange, sPrevTime);
+			for(UUID uuid: uuids) {
+				Player player = Utils.server.getPlayer(uuid);
+				if(player != null && !Utils.ignoringMessages.contains(player.getUniqueId())) {
 					player.sendMessage(fmessage);
 				}
 			}
