@@ -51,7 +51,7 @@ public class CommandProbe implements CommandExecutor {
 				probe.setItemMeta(meta);
 				player.getInventory().addItem(probe);
 			} else if(args.length == 1 || args.length == 2) {
-				if(args[0].equalsIgnoreCase("list")) {
+				if(args[0].equalsIgnoreCase("list") || args[0].equalsIgnoreCase("ls")) {
 					// List all probes
 					Set<Location> probes = Utils.getAllProbes(player);
 					if(probes.isEmpty()) {
@@ -69,29 +69,32 @@ public class CommandProbe implements CommandExecutor {
 					}
 				}
 				else if(args.length == 1) {
-					if(args[0].equalsIgnoreCase("clear")) {
+					if(args[0].equalsIgnoreCase("clear") || args[0].equalsIgnoreCase("cl")) {
 						// Clear all probes
 						Utils.removeAllProbes(player);
 						player.sendMessage(Utils.CHAT_PREFIX + "Cleared all probes.");
-					} else if(args[0].equalsIgnoreCase("hide")) {
+					} else if(args[0].equalsIgnoreCase("hide") || args[0].equalsIgnoreCase("h")) {
 						// Hide chat messages
 						Utils.ignoringMessages.add(player.getUniqueId());
 						player.sendMessage(Utils.CHAT_PREFIX + "Probe messages disabled.");
-					} else if(args[0].equalsIgnoreCase("show")) {
+					} else if(args[0].equalsIgnoreCase("show") || args[0].equalsIgnoreCase("s")) {
 						// Show chat messages
 						Utils.ignoringMessages.remove(player.getUniqueId());
 						player.sendMessage(Utils.CHAT_PREFIX + "Probe messages enabled.");
+					} else if(args[0].equalsIgnoreCase("help") || args[0].equals("?")) {
+						// Show help message
+						player.sendMessage(Utils.PROBE_HELP);
 					} else return false;
 				} else return false;
 			} else if(args.length == 4) {
-				if(args[0].equalsIgnoreCase("add")) {
+				if(args[0].equalsIgnoreCase("add") || args[0].equalsIgnoreCase("a")) {
 					// Add probe by coordinates
 					Location loc = argsToLocation(player, args[1], args[2], args[3]);
 					if(loc != null) {
 						Utils.addWithMessage(player, loc);
 						return true;
 					}
-				} else if(args[0].equalsIgnoreCase("remove")) {
+				} else if(args[0].equalsIgnoreCase("remove") || args[0].equalsIgnoreCase("r")) {
 					// Remove probe by coordinates
 					Location loc = argsToLocation(player, args[1], args[2], args[3]);
 					if(loc != null) {
